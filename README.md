@@ -108,8 +108,6 @@ Curated from Keren-Shaul et al. (2017, *Cell*), Krasemann et al. (2017), Haage e
 
 **DAM stage 2:** `CD9`, `CD63`, `SERPINE2`, `SPP1`, `CADM1`, `CD68`, `CTSZ`, `AXL`, `CLEC7A`, `CTSA`, `CD52`, `CSF1`, `LPL`, `CTSL`, `CST7`, `ITGAX`, `GUSB`, `HIF1A`
 
-All 27 genes confirmed present in the 36,601-gene dataset.
-
 ### Homeostatic Microglia | 8 genes
 `SALL1`, `HEXB`, `CX3CR1`, `TMEM119`, `TREM2`, `P2RY12`, `MERTK`, `PROS1`
 
@@ -189,7 +187,7 @@ Donors were median-split on DAM score (42 DAM-high, 42 DAM-low). Pseudobulk anal
 | `P2RY12` | −0.56 | 1.1×10⁻³ | Gold-standard homeostatic microglia marker |
 | `AC009432.2` | −1.20 | 6.7×10⁻⁴ | Most strongly downregulated gene overall |
 
-The DAM–homeostatic axis is directly validated by the DE results: **APOE and SPP1** (canonical DAM signature genes) are among the top upregulated genes, while **P2RY12 and CX3CR1** (gold-standard homeostatic microglia markers) are significantly downregulated in DAM-high donors. This bidirectional pattern can also be seen in how mouse single-cell literature predicts for the DAM transition.
+The DAM–homeostatic axis is directly validated by the DE results: **APOE and SPP1** (canonical DAM signature genes) are among the top upregulated genes, while **P2RY12 and CX3CR1** (Standard homeostatic microglia markers) are significantly downregulated in DAM-high donors. This bidirectional pattern can also be seen in how mouse single-cell literature predicts for the DAM transition.
 
 > **Note on circularity:** Donors were grouped by the same DAM score computed from `adata.X`. DE results should therefore be treated as hypothesis-generating rather than independent validation. Confirmatory analysis would require an orthogonal grouping variable (e.g., Braak stage) or a held-out cohort.
 
