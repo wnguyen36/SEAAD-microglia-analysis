@@ -8,7 +8,7 @@ Single-cell transcriptomic analysis of **240,651 microglia** from the Seattle Al
 
 Microglia are the brain's resident immune cells and have a central role in Alzheimer's disease (AD) pathology. This project applies a complete single-cell RNA-seq analysis pipeline to the SEA-AD microglia dataset in order to characterize how microglial cell states shift with disease progression and genetic risk.
 
-**Key questions addressed:**
+**Key questions:**
 - Do disease-associated microglia (DAM) accumulate with increasing Braak stage and cognitive decline?
 - Do APOE ε4 carriers show elevated DAM activation at the donor level?
 - Which microglial supertypes drive the transition from homeostatic to disease-associated states?
@@ -20,7 +20,7 @@ Microglia are the brain's resident immune cells and have a central role in Alzhe
 
 | Property | Value |
 |---|---|
-| Source | Allen Institute for Brain Science — SEA-AD consortium |
+| Source | Allen Institute for Brain Science: SEA-AD consortium |
 | Cell type | Microglia / perivascular macrophages |
 | Cells | 240,651 |
 | Genes | 36,601 |
@@ -101,7 +101,7 @@ SEA-AD-scRNAseq/
 
 ## Gene Signatures
 
-### Disease-Associated Microglia (DAM) — 27 genes
+### Disease-Associated Microglia (DAM) | 27 genes
 Curated from Keren-Shaul et al. (2017, *Cell*), Krasemann et al. (2017), Haage et al. (2024), among other sources (see citations and/or code). Mouse-to-human ortholog conversion performed via MGI records; mouse-specific genes without confirmed 1:1 human orthologs excluded.
 
 **DAM stage 1:** `APOE`, `B2M`, `FTH1`, `CSTB`, `LYZ`, `CTSB`, `TYROBP`, `TIMP2`, `CTSD`
@@ -110,7 +110,7 @@ Curated from Keren-Shaul et al. (2017, *Cell*), Krasemann et al. (2017), Haage e
 
 All 27 genes confirmed present in the 36,601-gene dataset.
 
-### Homeostatic Microglia — 8 genes
+### Homeostatic Microglia | 8 genes
 `SALL1`, `HEXB`, `CX3CR1`, `TMEM119`, `TREM2`, `P2RY12`, `MERTK`, `PROS1`
 
 Mouse-specific genes (`SIGLECH`, `GPR43`/`FFAR2`) excluded where no validated human ortholog exists.
@@ -207,7 +207,7 @@ The DAM–homeostatic axis is directly validated by the DE results: **APOE and S
 ### Supertype Activation Profiles (Donor-Aggregated)
 
 ![Donor-aggregated DAM and homeostatic score bar charts and scatter plot by microglial supertype](figures/supertype_activation_profiles.png)
-*Left: Mean DAM score per supertype (aggregated to donor level before averaging). Center: Homeostatic score. Right: DAM vs homeostatic scatter — bubble size = donor count, outlined bubbles = SEAAD subtypes. The inverse activation axis is clearly visible.*
+*Left: Mean DAM score per supertype (aggregated to donor level before averaging). Center: Homeostatic score. Right: DAM vs homeostatic scatter: bubble size = donor count, outlined bubbles = SEAAD subtypes. The inverse activation axis is clearly visible.*
 
 ---
 
@@ -249,7 +249,7 @@ The DAM–homeostatic axis is directly validated by the DE results: **APOE and S
 ### Pseudobulk Differential Expression: DAM-high vs DAM-low Donors
 
 ![Volcano plot of pseudobulk differential expression between DAM-high and DAM-low donors](figures/volcano_DE.png)
-*Pseudobulk volcano plot (n = 42 DAM-high vs 42 DAM-low donors). x-axis: mean difference of log1p(CPM). y-axis: −log10(BH-adjusted p-value). Red = upregulated in DAM-high (46 genes, FDR < 0.05, Δ > 0.5); blue = downregulated (23 genes). APOE (top DAM hit, +0.54) and SPP1 are upregulated; P2RY12 and CX3CR1 (homeostatic markers) are downregulated — directly validating the DAM transition.*
+*Pseudobulk volcano plot (n = 42 DAM-high vs 42 DAM-low donors). x-axis: mean difference of log1p(CPM). y-axis: −log10(BH-adjusted p-value). Red = upregulated in DAM-high (46 genes, FDR < 0.05, Δ > 0.5); blue = downregulated (23 genes). APOE (top DAM hit, +0.54) and SPP1 are upregulated; P2RY12 and CX3CR1 (homeostatic markers) are downregulated, directly validating the DAM transition.*
 
 ---
 
