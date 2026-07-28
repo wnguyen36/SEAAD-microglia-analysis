@@ -4,15 +4,9 @@ Single-cell transcriptomic analysis of **240,651 microglia** from the Seattle Al
 
 ---
 
-## Overview
+## Context
 
 Microglia are the brain's resident immune cells and have a central role in Alzheimer's disease (AD) pathology. This project applies a complete single-cell RNA-seq analysis pipeline to the SEA-AD microglia dataset in order to characterize how microglial cell states shift with disease progression and genetic risk.
-
-**Key questions:**
-- Do disease-associated microglia (DAM) accumulate with increasing Braak stage and cognitive decline?
-- Do APOE ε4 carriers show elevated DAM activation at the donor level?
-- Which microglial supertypes drive the transition from homeostatic to disease-associated states?
-- What genes are differentially expressed between DAM-high and DAM-low donors?
 
 ---
 
