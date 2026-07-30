@@ -1,3 +1,7 @@
+# IMPORTANT
+
+As of 7/29/26, this project is undergoing multiple changes in order to ensure statistical accuracy. Everything is being reiterated in this branch!!
+
 # SEA-AD Microglia scRNA-seq Analysis
 
 Single-cell transcriptomic analysis of **240,651 microglia** from the Seattle Alzheimer's Disease Brain Cell Atlas (SEA-AD), investigating disease-associated microglial (DAM) activation states across Alzheimer's disease severity, APOE genotype, and neuropathological burden.
