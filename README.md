@@ -6,7 +6,7 @@ Microglia are the brain's resident immune cells. In Alzheimer's disease (AD) the
 
 The data comes from the Seattle Alzheimer's Disease Brain Cell Atlas (SEA-AD), which profiled single nuclei from 84 donors spanning the full range of AD pathology (no disease to severe). Working from this, I scored each microglial nucleus against the mouse DAM and homeostatic gene lists, averaged those scores per donor, and tested them against the donors' neuropathology and cognitive records. 
 
-What I found out was that the mouse signature transfers only partially**.**
+What I found out was that the mouse signature transfers only partially.
 
 ### Gene Signatures
 
