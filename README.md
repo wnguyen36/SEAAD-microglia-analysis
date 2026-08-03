@@ -98,59 +98,75 @@ SEAAD-microglia-analysis/
 
 ## Figures
 
-### 1\. Microglial subtypes and activation scores
+### 1. Microglial subtypes and activation scores
 
-Supertypes and scores on UMAP
+![Microglial supertypes and DAM/homeostatic scores on a UMAP](figures/umap_supertype_vs_scores.png)
 
-SEA-AD's microglial subtypes shown side by side with the DAM and homeostatic scores.
+SEA-AD's microglial subtypes shown beside the DAM and homeostatic scores. The
+subtypes occupy different parts of the map, and the two scores form opposing
+gradients across it.
 
-### 2\. Activation profile of each subtype
+### 2. Activation profile of each subtype
 
-Activation profiles by supertype
+![Average DAM and homeostatic scores per microglial subtype](figures/supertype_activation_profiles.png)
 
-Average DAM and homeostatic score for every subtype, calculated per donor first. `Micro-PVM_3-SEAAD` is the most DAM-like of the well-represented subtypes. **Micro-PVM\_4-SEAAD appears highest but has only 2 donors and is not interpretable.**
+Average DAM and homeostatic score for every subtype, calculated per donor first.
+`Micro-PVM_3-SEAAD` is the most DAM-like of the well-represented subtypes.
+**`Micro-PVM_4-SEAAD` appears highest but has only 2 donors and is not
+interpretable.**
 
-### 3\. Subtype abundance across Braak stages
+### 3. Subtype abundance across Braak stages
 
-Subtype abundance by Braak stage
+![Microglial subtype proportions by Braak stage](figures/composition_braak.png)
 
-How the proportions of the three main subtypes shift as tau pathology worsens. `Micro-PVM_3-SEAAD` (purple) grows while `Micro-PVM_2` (green) shrinks. Braak 0 and II have too few donors to be trusted and are marked in red.
+How the proportions of the three main subtypes shift as tau pathology worsens.
+`Micro-PVM_3-SEAAD` (purple) grows while `Micro-PVM_2` (green) shrinks. Braak 0
+and II have too few donors to trust and are marked in red.
 
-### 4\. Composition and score against tissue staining
+### 4. Composition and score against tissue staining
 
-Composition vs histology
+![Subtype composition and mean DAM score plotted against AT8 and Iba1 staining](figures/composition_vs_histology.png)
 
-Compares two ways of measuring the same thing against protein staining from the same tissue. Counting cells of the DAM-like subtype tracks tau strongly (rho \= 0.51); averaging DAM scores tracks overall microglial abundance instead (rho \= 0.28). The right-hand column is the negative control.
+Two ways of measuring the same thing, compared against protein staining from the
+same tissue. Counting cells of the DAM-like subtype tracks tau strongly
+(rho = 0.51); averaging DAM scores tracks overall microglial abundance instead
+(rho = 0.28). The right-hand column is the negative control.
 
-### 5\. DAM score across Braak stages
+### 5. DAM score across Braak stages
 
-DAM score by Braak stage
+![Mean DAM score per donor by Braak stage](figures/DAM_by_Braak_donor_level.png)
 
-Average DAM score per donor, grouped by tau stage. The upward trend is real but modest, and the spread within each stage is wide.
+Average DAM score per donor, grouped by tau stage. The upward trend is real but
+modest, and the spread within each stage is wide.
 
-### 6\. DAM score against pathology measures
+### 6. DAM score against pathology measures
 
-DAM correlations
+![Spearman correlations between DAM score and pathology variables](figures/DAM_correlations_donor_level.png)
 
-Correlation between each donor's average DAM score and their pathology and cognitive measures. Four of six are significant.
+Correlation between each donor's average DAM score and their pathology and
+cognitive measures. Four of six are significant.
 
-### 7\. APOE4 carriers versus non-carriers
+### 7. APOE4 carriers versus non-carriers
 
-APOE4 status
+![Four microglial measures compared between APOE4 carriers and non-carriers](figures/APOE4_status.png)
 
-Four measures compared between APOE4 carriers and non-carriers. Only the negative control panel reaches significance, which is why this result is reported as null.
+Four measures compared between APOE4 carriers and non-carriers. Only the negative
+control panel reaches significance, which is why this result is reported as null.
 
-### 8\. DAM score by APOE genotype
+### 8. DAM score by APOE genotype
 
-DAM score by APOE genotype
+![Mean DAM score per donor split by APOE genotype](figures/APOE_genotype.png)
 
-The same data split by exact genotype. Scores drift upward with more copies of E4, but two genotype groups have fewer than 3 donors and cannot be interpreted.
+The same data split by exact genotype. Scores drift upward with more copies of
+E4, but two genotype groups have fewer than 3 donors and cannot be interpreted.
 
-### 9\. Genes differing between dementia and no-dementia donors
+### 9. Genes differing between dementia and no-dementia donors
 
-Volcano plot
+![Volcano plot of differential expression between dementia and no-dementia donors](figures/volcano_DE.png)
 
-Every gene tested, plotted by size of difference (left–right) against confidence (up–down). Genes higher in dementia sit on the left. Circled points are the pre-selected signature genes, marked so they are not mistaken for discoveries.
+Every gene tested, plotted by size of difference (left–right) against confidence
+(up–down). Genes higher in dementia sit on the left. Circled points are the
+pre-selected signature genes, marked so they are not mistaken for discoveries.
 
 ---
 
@@ -267,8 +283,6 @@ Amyloid measures move the control genes almost as much as the DAM genes.
 ## Citations
 
 **Data**
-
-Gabitto, M. I., Travaglini, K. J., et al. (2024). Integrated multimodal cell atlas of Alzheimer's disease. *Nature Neuroscience*, 27, 2366–2383. doi:10.1038/s41593-024-01774-5
 
 Seattle Alzheimer's Disease Brain Cell Atlas (SEA-AD), Allen Institute for Brain Science. [https://portal.brain-map.org/explore/seattle-alzheimers-disease](https://portal.brain-map.org/explore/seattle-alzheimers-disease)
 
