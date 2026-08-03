@@ -92,8 +92,31 @@ SEAAD-microglia-analysis/
 
 ## Pipeline
 
-*(to be written)*
+The full analysis lives in `notebooks/SeaAD_Analysis.ipynb`. Cells run in order.
 
+| Cell | Name | What it does |
+|---|---|---|
+| **1** | Imports | Loads Scanpy, pandas, NumPy, SciPy, seaborn and matplotlib|
+| **2** | Load Data | Reads the microglia `.h5ad` object + donor metadata + neuropathology tables |
+| **3** | Print labels at donor level | Summarizes the cohort per donor rather than per nucleus, and prints both |
+| **4** | Inspect existing cell type annotations | Prints subclass, supertype, + class labels |
+| **4B** | Filter out monocytes and lymphocytes | Removes all non-microglial nuclei; uses a Spearman correlation to test whether contamination levels track Braak stage (yes, rho = 0.24) |
+| **5** | Check normalization | Confirms the expression matrix is log1p-normalised |
+| **6** | Visualise existing UMAP embeddings | Plots the Allen Institute's UMAP coloured by subtype, cognitive status, Braak stage and donor severity. |
+| **6B** | Region coverage | Measures how much each donor's nuclei come from each brain region; uses Spearman correlations to check whether regional mix is confounded with pathology (it's not)|
+| **6C** | Restrict to MTG | Keeps only middle temporal gyrus nuclei |
+| **7** | Region-aware neuropathology join | Merges 12 quantitative staining measurements by donor |
+| **8** | Gene set scoring | Scores every nucleus against the DAM, homeostatic and negative-control gene lists using score_genes, + subscores by DAM stage; **Spearman correlations** check the scores |
+| **8B** | Compare subtype locations to DAM score zones | Plots subtype labels beside the DAM and homeostatic scores on the UMAP |
+| **8C** | DAM / homeostatic patterns per subtype | Averages scores per donor per subtype, then compares each subtype against that donor's other subtypes using a paired Wilcoxon signed-rank test w/ Benjamini–Hochberg correction |
+| **8C Diagnostic** | Paired test on the control score | Runs the identical paired test on the negative-control genes, which should stay flat |
+| **9** | Subtype composition vs Braak stage | Calculates each donor's subtype percentages and tests them against tau stage w/ Spearman correlation and Kruskal–Wallis, and against dementia status w/ Mann–Whitney U, all BH-corrected |
+| **10** | Correlation analysis: DAM score vs neuropathology | Spearman correlations between each donor's average DAM score and 6 pathology and cognitive measures, + the quantitative staining data, BH-corrected |
+| **10 Diagnostic** | Negative-control and depth check | Tests whether the control score and sequencing depth also track pathology |
+| **10B** | Composition vs quantitative neuropathology | Tests subtype percentage against protein staining (Spearman, BH-corrected) |
+| **11** | APOE4 and microglial state | Compares carriers with non-carriers (Mann–Whitney U w/ rank-biserial effect size) and tests E4 copy number (0/1/2) by Spearman; also rescores without `APOE` to rule out circularity. |
+| **11B** | Recheck specificity, complement-free control | Repeats the specificity comparisons after dropping complement genes from the control set |
+| **12** | Pseudobulk differential expression | Sums raw counts per donor, CPM-normalises, drops MT and low-expression genes, then tests all genes with Mann–Whitney U + BH correction and determines if signature genes are enriched using Wilcoxon rank-sum test |
 ---
 
 ## Figures
