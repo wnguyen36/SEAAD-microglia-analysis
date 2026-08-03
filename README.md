@@ -284,8 +284,6 @@ Amyloid measures move the control genes almost as much as the DAM genes.
 
 **Data**
 
-Gabitto, M. I., Travaglini, K. J., et al. (2024). Integrated multimodal cell atlas of Alzheimer's disease. *Nature Neuroscience*, 27, 2366–2383. doi:10.1038/s41593-024-01774-5
-
 Seattle Alzheimer's Disease Brain Cell Atlas (SEA-AD), Allen Institute for Brain Science. [https://portal.brain-map.org/explore/seattle-alzheimers-disease](https://portal.brain-map.org/explore/seattle-alzheimers-disease)
 
 **Gene signatures**
