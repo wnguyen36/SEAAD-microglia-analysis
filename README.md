@@ -1,314 +1,277 @@
-# IMPORTANT
+# SEA-AD Microglia snRNA-seq Analysis
 
-As of 7/29/26, this project is undergoing multiple changes in order to ensure statistical accuracy. Everything is being reiterated in this branch!!
+## Summary
 
-# SEA-AD Microglia scRNA-seq Analysis
+Microglia are the brain's resident immune cells. In Alzheimer's disease (AD) they shift out of their normal surveillance state into an activated one. Keren-Shaul et al. (2017) described this in mice and called the activated cells **disease-associated microglia (DAM)**. They showed the change happens in two steps: a first step that does not need the TREM2 gene, and a second that does. That signature was defined in **mouse** cells. This project explores whether it holds up in **human** brain tissue.
 
-Single-cell transcriptomic analysis of **240,651 microglia** from the Seattle Alzheimer's Disease Brain Cell Atlas (SEA-AD), investigating disease-associated microglial (DAM) activation states across Alzheimer's disease severity, APOE genotype, and neuropathological burden.
+The data comes from the Seattle Alzheimer's Disease Brain Cell Atlas (SEA-AD), which profiled single nuclei from 84 donors spanning the full range of AD pathology (no disease to severe). Working from this, I scored each microglial nucleus against the mouse DAM and homeostatic gene lists, averaged those scores per donor, and tested them against the donors' neuropathology and cognitive records. 
+
+What I found out was that the mouse signature transfers only partially**.**
+
+### Gene Signatures
+
+Using the differential expression results from Keren-Shaul et al. (2017) Supplementary Table S3 ("Differential Expression Analysis of Homeostatic Microglia to DAM"), with stage labels taken from their Figure 2\.
+
+A gene was kept only if it had a clear one-to-one mouse–human match, was statistically significant in the source (FDR \< 0.05), and was detected in at least 5% of nuclei.
+
+**DAM signature (27 genes)**
+
+*Stage 1 (no TREM2):* `APOE` `TYROBP` `B2M` `FTH1` `CTSB` `CTSD` `CSTB` `TIMP2`
+
+*Stage 2 (needs TREM2):* `CST7` `CLEC7A` `LPL` `ANKH` `SPP1` `AXL` `CSF1` `ITGAX` `CADM1` `CD63` `CD9` `SERPINE2` `GUSB` `CTSZ` `HIF1A` `CTSL` `CD68` `CTSA` `TREM2`
+
+**Homeostatic signature (26 genes)** 
+
+`TMEM119` `P2RY12` `P2RY13` `TXNIP` `CX3CR1` `SERINC3` `TGFBR1` `GLUL` `MAF` `CD164` `ZFHX3` `SRGAP2` `RHOB` `CMTM6` `ADGRG1` `LPCAT2` `MARCKS` `SLCO2B1` `SELPLG` `SALL1` `BIN1` `ITGAM` `PMEPA1` `OLFML3` `EPB41L2` `PTGS1`
+
+**Negative control (7 genes):** microglial genes that barely change between the two states in the source data. If these move with disease, the signal is likely technical rather than biological.
+
+`HEXB` `C1QA` `C1QB` `C1QC` `CTSS` `CSF1R` `CST3`
+
+**Excluded:** `H2-D1`, `Lyz2`, `Ccl6` (no clean human equivalent) and `CD52` (found in only 0.3% of nuclei).
 
 ---
 
-## Context
+## How to Set Up
 
-Microglia are the brain's resident immune cells and have a central role in Alzheimer's disease (AD) pathology. This project applies a complete single-cell RNA-seq analysis pipeline to the SEA-AD microglia dataset in order to characterize how microglial cell states shift with disease progression and genetic risk.
+### 1\. Clone the repository
 
----
+git clone https://github.com/wnguyen36/SEAAD-microglia-analysis.git
 
-## Dataset
+cd SEAAD-microglia-analysis
 
-| Property | Value |
-|---|---|
-| Source | Allen Institute for Brain Science: SEA-AD consortium |
-| Cell type | Microglia / perivascular macrophages |
-| Cells | 240,651 |
-| Genes | 36,601 |
-| Donors | 84 |
-| Normalization | Log-normalized (log1p), pre-processed by Allen Institute |
+### 2\. Create the environment
 
-**Clinical metadata integrated:**
-- Cognitive status (No dementia / Dementia)
-- Braak neurofibrillary tangle stage (0 – VI)
-- CERAD neuritic plaque score (Absent → Frequent)
-- Thal amyloid phase (0 – 5)
-- Overall AD neuropathological change (Not AD → High)
-- APOE genotype (2/2, 2/3, 3/3, 2/4, 3/4, 4/4)
-- Severely affected donor flag
-- Sex, age at death, post-mortem interval (PMI)
-- Quantitative neuropathology: Iba1+ area, AT8+ tau burden, 6E10+ amyloid, NeuN+ cell density, RIPA pTau/Aβ42
+Built and tested on Python 3.10.2.
 
-**Microglial supertypes (Allen Institute annotations):**
+conda create \-n seaad python=3.10.2
 
-| Supertype | Cells | Description |
-|---|---|---|
-| Micro-PVM_2 | 141,248 | Canonical homeostatic microglia |
-| Micro-PVM_2_3-SEAAD | 53,815 | SEAAD-enriched transitional subtype |
-| Micro-PVM_3-SEAAD | 29,805 | SEAAD-enriched activated subtype |
-| Micro-PVM_1 | 7,909 | Canonical homeostatic microglia |
-| Lymphocyte | 4,607 | Contaminating lymphocytes |
-| Micro-PVM_4-SEAAD | 1,767 | SEAAD-enriched reactive subtype |
-| Micro-PVM_2_1-SEAAD | 1,458 | SEAAD-enriched subtype |
-| Monocyte | 42 | Contaminating monocytes |
+conda activate seaad
+
+pip install \-r requirements.txt
+
+### 3\. Download the data
+
+Download them from the SEA-AD portal and place them in `data/`.
+
+Main portal: [https://brain-map.org/consortia/sea-ad/our-data](https://brain-map.org/consortia/sea-ad/our-data)
+
+| File | Save as | Notes |
+| :---- | :---- | :---- |
+| Microglia-PVM snRNA-seq object | `data/SEAAD_microglia.h5ad` | \~2 GB. Under "Single nucleus omics" |
+| Donor clinical metadata | `data/SEAAD_donor_metadata.xlsx` | Age, sex, Braak, CERAD, APOE, cognitive status |
+| Quantitative neuropathology | `data/SEAAD_neuropathology.csv` | Iba1, AT8, 6e10, NeuN image measurements |
+
+**Version note:** SEA-AD updated several files in June 2026\. This analysis used the versions available before that update. The neuropathology measurements used here are from the middle temporal gyrus (MTG) only.
+
+### 4\. Run the notebook
+
+jupyter notebook notebooks/SeaAD\_Analysis.ipynb
+
+Run cells in order from the top. Figures save to `figures/`, tables to `results/`.
+
+### Repository layout
+
+SEAAD-microglia-analysis/
+
+├── data/                       \# downloaded SEA-AD files (not tracked)
+
+├── figures/                    \# generated plots of note
+
+├── notebooks/
+
+│   └── SeaAD\_Analysis.ipynb    \# the full analysis
+
+├── results/                    \# all generated plots (not tracked)
+
+├── LICENSE
+
+└── README.md
 
 ---
 
 ## Pipeline
 
-The analysis is structured as a modular Python package (`src/`) with a primary analysis notebook (`notebooks/SeaAD_Analysis.ipynb`). It is worth mentioning that this project was built on top of another scRNA-seq of the PBMC 3K dataset, as seen in notebooks 01-04. 
-
-```
-SEA-AD-scRNAseq/
-├── src/
-│   ├── preprocess.py     # QC filtering, normalization, checkpointing
-│   ├── cluster.py        # PCA, KNN graph, UMAP, Leiden clustering
-│   ├── annotate.py       # Marker gene identification, cell type assignment, gene set scoring
-│   └── visualize.py      # QC, HVG, PCA, UMAP, dotplot visualizations
-├── notebooks/
-│   ├── SeaAD_Analysis.ipynb   # Main analysis (Cells 1–12)
-│   ├── 01_qualcontrol.ipynb
-│   ├── 02_normalization.ipynb
-│   ├── 03_clustering.ipynb
-│   └── 04_labeling.ipynb
-├── data/
-│   ├── SEAAD_microglia.h5ad        # Primary dataset (Allen Institute)
-│   ├── SEAAD_donor_metadata.xlsx   # Clinical donor metadata
-│   └── SEAAD_neuropathology.csv    # Quantitative neuropathology measurements
-├── figures/                        # Publication-quality figures (300 dpi)
-└── results/                        # Saved AnnData objects and CSVs
-```
-
-### Analysis steps
-
-| Cell | Step | Key tools |
-|---|---|---|
-| 1 | Environment setup & module imports | Scanpy, pandas, NumPy, SciPy, seaborn |
-| 2 | Dataset loading & metadata inspection | `sc.read_h5ad`, pandas |
-| 3 | Clinical variable audit | Value counts across all AD staging variables |
-| 4 | Allen Institute cell type annotation review | Subclass / Supertype / Class labels |
-| 5 | Normalization status verification | Sparse matrix diagnostics, known marker validation |
-| 6 | UMAP visualization by clinical variables | Supertype, cognitive status, Braak, severely affected donors |
-| 7 | Neuropathology metadata integration | Donor-level join of Iba1, AT8, 6E10, NeuN, pTau/Aβ42 |
-| 8 | Gene set scoring (DAM & Homeostatic) | `sc.tl.score_genes`, 27-gene DAM signature, 8-gene homeostatic signature |
-| 8B | Supertype activation profiling | UMAP overlays, donor-aggregated bar charts, scatter plot |
-| 8C | Statistical testing (supertype-level) | Mann-Whitney U, Benjamini-Hochberg FDR |
-| 9 | Subtype composition analysis by Braak | Donor-level proportions, seaborn boxplots |
-| 10 | Donor-level correlation analysis | Spearman ρ vs Braak, CERAD, Thal, ADNC, cognitive status, age |
-| 11 | APOE4 subgroup analysis | Carrier vs non-carrier Mann-Whitney U at donor level |
-| 12 | Pseudobulk differential expression | CPM normalization, Mann-Whitney per gene, BH correction, volcano plot |
-
----
-
-## Gene Signatures
-
-### Disease-Associated Microglia (DAM) | 27 genes
-Curated from Keren-Shaul et al. (2017, *Cell*), Krasemann et al. (2017), Haage et al. (2024), among other sources (see citations and/or code). Mouse-to-human ortholog conversion performed via MGI records; mouse-specific genes without confirmed 1:1 human orthologs excluded.
-
-**DAM stage 1:** `APOE`, `B2M`, `FTH1`, `CSTB`, `LYZ`, `CTSB`, `TYROBP`, `TIMP2`, `CTSD`
-
-**DAM stage 2:** `CD9`, `CD63`, `SERPINE2`, `SPP1`, `CADM1`, `CD68`, `CTSZ`, `AXL`, `CLEC7A`, `CTSA`, `CD52`, `CSF1`, `LPL`, `CTSL`, `CST7`, `ITGAX`, `GUSB`, `HIF1A`
-
-### Homeostatic Microglia | 8 genes
-`SALL1`, `HEXB`, `CX3CR1`, `TMEM119`, `TREM2`, `P2RY12`, `MERTK`, `PROS1`
-
-Mouse-specific genes (`SIGLECH`, `GPR43`/`FFAR2`) excluded where no validated human ortholog exists.
-
----
-
-## Key Results
-
-### 1. DAM Activation Tracks Cognitive Decline and Braak Pathology
-
-Donor-level Spearman correlations between mean DAM score and neuropathological variables across **n = 84 donors**:
-
-| Variable | Spearman ρ | p-value | Significant |
-|---|---|---|---|
-| Cognitive Status (dementia) | +0.25 | 0.022 | Yes |
-| Braak Stage | +0.16 | 0.152 | No |
-| CERAD Score | +0.12 | 0.272 | No |
-| Thal Phase | +0.11 | 0.310 | No |
-| Overall AD Neuropathological Change | +0.05 | 0.628 | No |
-| Age at Death | −0.04 | 0.739 | No |
-
-Cognitive status reached significance (ρ = 0.25, p = 0.022): donors with dementia averaged a DAM score of **0.705** vs **0.651** in cognitively intact donors (Δ = 0.054). Braak, CERAD, and Thal showed consistent positive trends that did not survive the 84-donor sample size.
-
-DAM scores show a monotonic increase across Braak stages 0 → VI even without reaching significance, rising from a mean of **0.55** (Braak 0, n = 2) to **0.72** (Braak VI, n = 15), a **31% increase** in mean DAM activation across the full pathological spectrum.
-
-### 2. SEAAD Subtypes Occupy the Activated End of the DAM–Homeostatic Axis
-
-Donor-aggregated DAM scores were compared across all microglial supertypes using Mann-Whitney U with Benjamini-Hochberg correction. SEAAD-enriched subtypes show consistently elevated DAM scores and reciprocally suppressed homeostatic scores relative to canonical populations:
-
-| Supertype | DAM score (donor mean) | Homeostatic score (donor mean) | DAM − Homeo |
-|---|---|---|---|
-| Micro-PVM_4-SEAAD | Highest | Lowest | Largest positive |
-| Micro-PVM_3-SEAAD | High | Low | Positive |
-| Micro-PVM_2_3-SEAAD | High | Low | Positive |
-| Micro-PVM_2 | Low | High | Negative |
-| Micro-PVM_1 | Lowest | Highest | Most negative |
-
-The activation scatter plot (DAM score vs homeostatic score, bubble sized by donor count) reveals an inverse axis. All SEAAD subtypes cluster in the high-DAM / low-homeostatic quadrant, while canonical subtypes occupy the opposite corner.
-
-### 3. APOE4 Carriers Show Elevated DAM Activation
-
-At the donor level (one value per donor, avoiding pseudoreplication across 240K cells):
-
-| Group | n donors | Median DAM score |
-|---|---|---|
-| APOE4 non-carriers (2/2, 2/3, 3/3) | 59 | 0.646 |
-| APOE4 carriers (2/4, 3/4, 4/4) | 25 | 0.692 |
-
-APOE4 carriers show a **7.1% higher median DAM score** than non-carriers. The dose-response pattern is visible across all six genotypes. Homozygous 4/4 carriers trend highest which is consistent with APOE4's known role in potentiating microglial activation through impaired lipid clearance and TREM2 signaling.
-
-### 4. Pseudobulk Differential Expression: 69 Genes Distinguish DAM-high from DAM-low Donors
-
-Donors were median-split on DAM score (42 DAM-high, 42 DAM-low). Pseudobulk analysis used raw UMI counts summed per donor → CPM-normalized → log1p-transformed, then tested per gene with Mann-Whitney U and Benjamini-Hochberg FDR correction:
-
-| Direction | Genes (FDR < 0.05, \|mean diff log1p(CPM)\| > 0.5) |
-|---|---|
-| Upregulated in DAM-high | 46 |
-| Downregulated in DAM-high | 23 |
-
-**Top upregulated genes (DAM-high donors):**
-
-| Gene | Mean Δ log1p(CPM) | FDR | Biology |
-|---|---|---|---|
-| `APOE` | +0.54 | 9×10⁻⁶ | Canonical DAM marker; strongest genetic risk factor for late-onset AD |
-| `LINC00482` | +0.62 | 1.7×10⁻⁵ | Long non-coding RNA |
-| `S100A6` | +0.53 | 3.3×10⁻⁵ | Calcium-binding protein; inflammation and glial reactivity |
-| `AC020909.2` | +0.67 | 2.1×10⁻⁴ | Long non-coding RNA |
-| `LGALS1` | +0.53 | 2.2×10⁻⁴ | Galectin-1; immune modulation |
-| `CD151` | +0.58 | 2.3×10⁻⁴ | Tetraspanin; cell adhesion and migration |
-| `C5AR1` | +0.55 | 3.1×10⁻⁴ | Complement receptor; neuroinflammatory signaling |
-
-**Top downregulated genes (DAM-high donors):**
-
-| Gene | Mean Δ log1p(CPM) | FDR | Biology |
-|---|---|---|---|
-| `P2RY12` | −0.56 | 1.1×10⁻³ | Gold-standard homeostatic microglia marker |
-| `AC009432.2` | −1.20 | 6.7×10⁻⁴ | Most strongly downregulated gene overall |
-
-The DAM–homeostatic axis is directly validated by the DE results: **APOE and SPP1** (canonical DAM signature genes) are among the top upregulated genes, while **P2RY12 and CX3CR1** (Standard homeostatic microglia markers) are significantly downregulated in DAM-high donors. This bidirectional pattern can also be seen in how mouse single-cell literature predicts for the DAM transition.
-
-> **Note on circularity:** Donors were grouped by the same DAM score computed from `adata.X`. DE results should therefore be treated as hypothesis-generating rather than independent validation. Confirmatory analysis would require an orthogonal grouping variable (e.g., Braak stage) or a held-out cohort.
+*(to be written)*
 
 ---
 
 ## Figures
 
-### UMAP: Microglial Supertypes, Clinical Variables, and Gene Scores
+### 1\. Microglial subtypes and activation scores
 
-![UMAP colored by Allen Institute microglial supertypes, Braak stage, and DAM/homeostatic scores side-by-side](figures/umap_supertype_vs_scores.png)
-*Side-by-side UMAP of 240,651 microglia. Left: Allen Institute supertype annotations. Center: DAM activation score (red = high). Right: Homeostatic score (red = high). SEAAD subtypes cluster in high-DAM / low-homeostatic regions.*
+Supertypes and scores on UMAP
 
----
+SEA-AD's microglial subtypes shown side by side with the DAM and homeostatic scores.
 
-### Supertype Activation Profiles (Donor-Aggregated)
+### 2\. Activation profile of each subtype
 
-![Donor-aggregated DAM and homeostatic score bar charts and scatter plot by microglial supertype](figures/supertype_activation_profiles.png)
-*Left: Mean DAM score per supertype (aggregated to donor level before averaging). Center: Homeostatic score. Right: DAM vs homeostatic scatter: bubble size = donor count, outlined bubbles = SEAAD subtypes. The inverse activation axis is clearly visible.*
+Activation profiles by supertype
 
----
+Average DAM and homeostatic score for every subtype, calculated per donor first. `Micro-PVM_3-SEAAD` is the most DAM-like of the well-represented subtypes. **Micro-PVM\_4-SEAAD appears highest but has only 2 donors and is not interpretable.**
 
-### SEAAD Subtype Abundance by Braak Stage
+### 3\. Subtype abundance across Braak stages
 
-![Boxplot of SEAAD microglial subtype proportions by Braak stage](figures/composition_braak.png)
-*Per-donor proportion (% of total microglia) for each SEAAD-enriched subtype stratified by Braak neurofibrillary tangle stage. Increasing Braak stage corresponds to greater abundance of disease-enriched subtypes.*
+Subtype abundance by Braak stage
 
----
+How the proportions of the three main subtypes shift as tau pathology worsens. `Micro-PVM_3-SEAAD` (purple) grows while `Micro-PVM_2` (green) shrinks. Braak 0 and II have too few donors to be trusted and are marked in red.
 
-### DAM Score Correlations with Neuropathological Variables
+### 4\. Composition and score against tissue staining
 
-![Spearman rho bar chart: DAM score vs Braak, CERAD, Thal, ADNC, cognitive status, and age](figures/DAM_correlations_donor_level.png)
-*Donor-level Spearman ρ between mean DAM score and six neuropathological/clinical variables. Blue bars = FDR-significant (p < 0.05). Cognitive status (dementia) is the only variable reaching significance (ρ = 0.25, p = 0.022) at n = 84 donors.*
+Composition vs histology
 
----
+Compares two ways of measuring the same thing against protein staining from the same tissue. Counting cells of the DAM-like subtype tracks tau strongly (rho \= 0.51); averaging DAM scores tracks overall microglial abundance instead (rho \= 0.28). The right-hand column is the negative control.
 
-### DAM Score by Braak Stage
+### 5\. DAM score across Braak stages
 
-![Boxplot of donor-level mean DAM score across Braak stages 0 through VI](figures/DAM_by_Braak_donor_level.png)
-*One data point per donor. Mean DAM score rises monotonically from 0.55 (Braak 0) to 0.72 (Braak VI), a 31% increase across the full pathological range, though not reaching statistical significance at this sample size.*
+DAM score by Braak stage
 
----
+Average DAM score per donor, grouped by tau stage. The upward trend is real but modest, and the spread within each stage is wide.
 
-### APOE4 Analysis: Carriers vs Non-carriers
+### 6\. DAM score against pathology measures
 
-![Boxplots of DAM and homeostatic scores split by APOE4 carrier status at the donor level](figures/APOE4_scores_donor_level.png)
-*Donor-level DAM and homeostatic scores by APOE4 status. APOE4 carriers (n = 25) show a median DAM score of 0.692 vs 0.646 in non-carriers (n = 59), a 7.1% difference consistent with APOE4-driven microglial priming.*
+DAM correlations
 
----
+Correlation between each donor's average DAM score and their pathology and cognitive measures. Four of six are significant.
 
-### DAM Score Across All APOE Genotypes
+### 7\. APOE4 carriers versus non-carriers
 
-![Boxplot of donor-level DAM score across all six APOE genotypes with per-group n annotations](figures/DAM_by_APOE_genotype_donor_level.png)
-*DAM score stratified across all six APOE genotypes (2/2 through 4/4). Per-group n annotated below each box to flag low-powered subgroups (2/2, 2/4). A dose-response trend is visible with increasing ε4 allele count.*
+APOE4 status
 
----
+Four measures compared between APOE4 carriers and non-carriers. Only the negative control panel reaches significance, which is why this result is reported as null.
 
-### Pseudobulk Differential Expression: DAM-high vs DAM-low Donors
+### 8\. DAM score by APOE genotype
 
-![Volcano plot of pseudobulk differential expression between DAM-high and DAM-low donors](figures/volcano_DE.png)
-*Pseudobulk volcano plot (n = 42 DAM-high vs 42 DAM-low donors). x-axis: mean difference of log1p(CPM). y-axis: −log10(BH-adjusted p-value). Red = upregulated in DAM-high (46 genes, FDR < 0.05, Δ > 0.5); blue = downregulated (23 genes). APOE (top DAM hit, +0.54) and SPP1 are upregulated; P2RY12 and CX3CR1 (homeostatic markers) are downregulated, directly validating the DAM transition.*
+DAM score by APOE genotype
 
----
+The same data split by exact genotype. Scores drift upward with more copies of E4, but two genotype groups have fewer than 3 donors and cannot be interpreted.
 
-## Methods Summary
+### 9\. Genes differing between dementia and no-dementia donors
 
-**Normalization:** Data provided by the Allen Institute is already log1p-normalized from raw UMIs. Confirmed via matrix value range (0–5.07) and `log1p` key in `adata.uns`.
+Volcano plot
 
-**Gene set scoring:** `sc.tl.score_genes` (Seurat-style control-gene subtraction). Scores are computed per cell then aggregated to donor level by mean for all downstream statistical tests.
-
-**Donor-level aggregation:** All statistical comparisons (supertype testing, Braak correlation, APOE analysis) operate on per-donor mean scores rather than pooled cells, preventing pseudoreplication inflating sample size.
-
-**Pseudobulk DE:** Raw UMI counts (`adata.layers['UMIs']`) summed per donor → CPM → log1p. Mann-Whitney U per gene, Benjamini-Hochberg FDR correction. Thresholds: FDR < 0.05 and |mean difference of log1p(CPM)| > 0.5. Note: this metric is a mean difference of log1p-transformed CPM values, not a true log2 fold change.
-
-**Multiple testing correction:** Benjamini-Hochberg FDR applied for all multi-gene and multi-group comparisons (`statsmodels.stats.multitest.multipletests`).
+Every gene tested, plotted by size of difference (left–right) against confidence (up–down). Genes higher in dementia sit on the left. Circled points are the pre-selected signature genes, marked so they are not mistaken for discoveries.
 
 ---
 
-## Technologies
+## Results
 
-| Category | Tools |
-|---|---|
-| Core analysis | [Scanpy](https://scanpy.readthedocs.io/) 1.x, AnnData |
-| Numerical | NumPy, SciPy (Spearman, Mann-Whitney U) |
-| Data manipulation | pandas |
-| Visualization | Matplotlib, seaborn |
-| Statistics | SciPy stats, statsmodels (BH correction) |
-| Data format | HDF5 / h5ad |
-| Language | Python 3.10 |
+After removing non-microglial nuclei and restricting to the MTG, the analysis covers 35,907 nuclei from 84 donors. Since all statistics are calculated by donor, the sample size is 84\.
+
+### 1\. Count cells instead of averaging
+
+The clearest result is from determining which subtype of microglia a donor has predicts their pathology much better than the average activation score of their microglia.
+
+| Measure | % of DAM-like subtype | Average DAM score |
+| :---- | :---- | :---- |
+| CERAD (plaques) | **0.52** | 0.26 |
+| AT8 staining (tau) | **0.51** | 0.23 |
+| Cognitive status | **0.48** | 0.29 |
+| Braak stage (tau) | **0.45** | 0.27 |
+| Thal phase (amyloid) | **0.45** | 0.26 |
+| 6e10 staining (amyloid) | **0.34** | 0.21 |
+| Iba1 (microglial amount) | 0.07 | **0.28** |
+
+*(Spearman correlation, higher \= stronger relationship)*
+
+This is simply due to how each subtype is weighted. The DAM-like subtype (Micro-PVM\_3-SEAAD) only makes up 14% of the microglia, so when it grows between healthy and dementia donors, the average score will not see a great increase. 
+
+**The subtype expands with disease:**
+
+- With tau stage (Braak III–VI): rho \= 0.40, adjusted p \= 0.002  
+- With dementia: 9.3% → 15.3% of microglia, adjusted p \= 0.0001  
+- With tau staining (AT8): rho \= 0.51, adjusted p \< 0.0001
+
+### 2\. Two processes
+
+Two measurements that looked similar turned out to capture separate processes.
+
+Recalculating the DAM score using only ordinary `Micro-PVM_2` microglia:
+
+|  | Iba1 (microglial amount) | AT8 (tau) |
+| :---- | :---- | :---- |
+| All microglia | 0.28 | 0.23 |
+| `Micro-PVM_2` only | **0.28** | **0.12 (null)** |
+
+This table concludes that ordinary microglia raise their DAM genes slightly in donors with more microglia overall whereas tau pathology is tied specifically to the DAM-like subtype becoming more common (not to ordinary microglia changing).
+
+### 3\. Mouse signature only transfers partially
+
+| Gene | Effect size in mouse | Detected in human nuclei |
+| :---- | :---- | :---- |
+| `CST7` | \+6.08 (strongest in the source) | **1.0%** |
+| `CSF1` | \+5.23 | **0.5%** |
+| `LPL` | \+4.95 | 5.5% |
+| `SERPINE2` | \+2.00 | 2.9% |
+
+Homeostatic markers show the same problem: `TMEM119` at 21%, `HEXB` at 24%, `SALL1` at 20%. 
+
+Other reasons why the mouse framework does not map cleanly:
+
+- The two DAM stages barely track each other (rho \= 0.33).   
+- At the single-nucleus level the DAM and homeostatic scores do not oppose each other (rho \= \+0.05). 
+
+### 4\. Finding human activation genes
+
+Comparing donors with and without dementia across all 17,351 well-detected genes, without using any preset list, gave **319 significant genes**. The ones higher in dementia are recognisable human microglial activation markers:
+
+`GPNMB` · `LGALS3` (galectin-3) · `CHI3L1` (YKL-40, a clinical AD biomarker) · `CD44` · `PLIN2` · `S100A4` · `LYZ` · `FLT1`
+
+None of these are in the mouse DAM list. For studying human tissue, I believe these genes are worth looking at, instead of the mouse signatures.
+
+Signature genes also moved in the expected directions: `CTSD` (adj. p \= 0.015), `CD9` (0.040) and `LPL` (0.045) higher in dementia; `CX3CR1`, `P2RY12` and `P2RY13` higher in donors without dementia, though not significantly.
+
+### 5\. Negative controls and what they mean
+
+A set of microglial genes that barely change in the source data was scored alongside everything else. Implementing this ruled out some statements:
+
+Sequencing depth is not driving the results. Per donor, DAM score versus depth was −0.004.
+
+Tau and cognition are subtype-specific; amyloid is not. Comparing each result against the control set:
+
+| Measure | Specificity gap |
+| :---- | :---- |
+| Cognitive status | **0.41** |
+| Braak (tau) | **0.34** |
+| AT8 (tau) | **0.32** |
+| CERAD | 0.27 |
+| Thal (amyloid) | 0.15 |
+| 6e10 (amyloid) | 0.14 |
+
+Amyloid measures move the control genes almost as much as the DAM genes.
+
+### 6\. Null results
+
+- **APOE4 carriers.** No measure survived correction. The negative control was in fact the *most* significant panel (p \= 0.045). Removing `APOE` from the score barely changed it (rho \= 0.98), so the result was not circular either.  
+- **Signature enrichment in the differential expression.** DAM genes did rank toward the dementia side (27.6th percentile), but the negative control ranked the same way (25.0th). Inconclusive.  
+- **Age at death, & overall AD neuropathological change.** Neither correlated with the DAM score.
 
 ---
 
-## References
+## Limitations
 
-1. Bennett, M. L., Bennett, F. C., Liddelow, S. A., et al. (2016). New tools for studying microglia in the mouse and human CNS. *Proceedings of the National Academy of Sciences*, 113(12), E1738–E1746. https://doi.org/10.1073/pnas.1525528113
+**Nuclei** lack most cytoplasmic RNA. The mouse signature was defined in whole cells, so there may have been some poor transfer.
 
-2. Buttgereit, A., Lelios, I., Yu, X., et al. (2016). Sall1 is a transcriptional regulator defining microglia identity and function. *Nature Immunology*, 17(12), 1397–1406. https://doi.org/10.1038/ni.3585
+**Microglia and perivascular macrophages (PVM) are indistinguishable.** SEA-AD labels them together as "Microglia-PVM," with no subtype separating them. Perivascular macrophages express several DAM genes, so a fraction of the signal may come from them.
 
-3. Butovsky, O., Jedrychowski, M. P., Moore, C. S., et al. (2014). Identification of a unique TGF-β–dependent molecular and functional signature in microglia. *Nature Neuroscience*, 17(1), 131–143. https://doi.org/10.1038/nn.3599
+**Only one brain region.** MTG was chosen because it was the only region present in all 84 donors and because the neuropathology measurements come from it. This may not hold elsewhere in the brain.
 
-4. Haage, V., & De Jager, P. L. (2024). DAM revisited: new insights into microglial states in neurodegeneration. *Molecular Neurodegeneration*, 19, 84. https://doi.org/10.1186/s13024-024-00756-2
+**Potential negative control set flaws.** It includes complement genes (`C1QA/B/C`), which rise in human AD. Removing them leaves only four genes, too few to be reliable. A better approach would compare against many randomly chosen gene sets matched for expression level.
 
-5. Hickman, S. E., Kingery, N. D., Ohsumi, T. K., et al. (2013). The microglial sensome revealed by direct RNA sequencing. *Nature Neuroscience*, 16(12), 1896–1905. https://doi.org/10.1038/nn.3554
+**Sample size distribution.** 84 donors, however, are spread unevenly across stages. Braak 0 has 2 donors and Braak II has 4\. Those stages were excluded from trend tests.
 
-6. Holtman, I. R., Skola, D., & Glass, C. K. (2020). Transcriptional control of microglia phenotypes in health and disease. *Journal of Clinical Investigation*, 127(9), 3220–3229. https://doi.org/10.1172/JCI90604
+**Proportions are linked.** Subtype percentages must add to 100%, so one going up forces another down. Results are also reported as a ratio between two subtypes, which avoids this, but one subtype going up does not necessarily mean the other is inhibited.
 
-7. Keren-Shaul, H., Spinrad, A., Weiner, A., et al. (2017). A unique microglia type associated with restricting development of Alzheimer's disease. *Cell*, 169(7), 1276–1290. https://doi.org/10.1016/j.cell.2017.05.018
+**Residual contamination.** `BANK1` and `PRKCQ` (B- and T-cell genes) appear among genes higher in no-dementia donors, and 16% of the significant novel genes are unnamed lncRNAs. Both suggest leftover ambient RNA.
 
-8. Krasemann, S., Madore, C., Cialic, R., et al. (2017). The TREM2-APOE pathway drives the transcriptional phenotype of dysfunctional microglia in neurodegenerative diseases. *Immunity*, 47(3), 566–581. https://doi.org/10.1016/j.immuni.2017.08.008
+## Citations
 
-9. Lambert, J. C., Ibrahim-Verbaas, C. A., Harold, D., et al. (2013). Meta-analysis of 74,046 individuals identifies 11 new susceptibility loci for Alzheimer's disease. *Nature Genetics*, 45(12), 1452–1458. https://doi.org/10.1038/ng.2802
+**Data**
 
-10. Masuda, T., Sankowski, R., Staszewski, O., et al. (2020). Microglia heterogeneity in the single-cell era. *Cell Reports*, 30(5), 1271–1281. https://doi.org/10.1016/j.celrep.2020.107843
+Gabitto, M. I., Travaglini, K. J., et al. (2024). Integrated multimodal cell atlas of Alzheimer's disease. *Nature Neuroscience*, 27, 2366–2383. doi:10.1038/s41593-024-01774-5
 
-11. Mouse Genome Informatics (MGI). The Jackson Laboratory, Bar Harbor, Maine. https://www.informatics.jax.org
+Seattle Alzheimer's Disease Brain Cell Atlas (SEA-AD), Allen Institute for Brain Science. [https://portal.brain-map.org/explore/seattle-alzheimers-disease](https://portal.brain-map.org/explore/seattle-alzheimers-disease)
 
-12. SEA-AD Consortium. (2023). Seattle Alzheimer's Disease Brain Cell Atlas. Allen Institute for Brain Science. https://portal.brain-map.org/explore/seattle-alzheimers-disease
+**Gene signatures**
 
-13. Yin, Z., Raj, D., Saiepour, N., et al. (2017). Immune hyperreactivity of Aβ plaque-associated microglia in Alzheimer's disease. *Neurobiology of Aging*, 55, 115–122. https://doi.org/10.1016/j.neurobiolaging.2017.03.021
-
----
-
-## Data Access
-
-The SEA-AD dataset is publicly available through the Allen Brain Cell Atlas portal. Donor metadata and neuropathology tables are distributed alongside the atlas.
-
-> **Note:** The `.h5ad` file (`SEAAD_microglia.h5ad`, ~2 GB) is excluded from version control via `.gitignore`. Download from the Allen Brain Cell Atlas portal to reproduce this analysis.
+Keren-Shaul, H., Spinrad, A., Weiner, A., et al. (2017). A unique microglia type associated with restricting development of Alzheimer's disease. *Cell*, 169(7), 1276–1290. doi:10.1016/j.cell.2017.05.018
